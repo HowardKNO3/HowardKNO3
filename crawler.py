@@ -58,8 +58,10 @@ class Crawler(object):
         titles = root.xpath("//html/body/div[1]/div/div[2]/div/div/div/div/table/tbody/tr/td[2]/a/text()")
         rel_urls = root.xpath("//html/body/div[1]/div/div[2]/div/div/div/div/table/tbody/tr/td[2]//a/@href")
         contents = list()
+        last_date = datetime(2050, 1, 1)
         #print(rel_urls)
         for i in range(0, 10):
+            last_date = min(last_date, datetime.strptime(dates[i], "%Y-%m-%d"))
             if ((datetime.strptime(dates[i], "%Y-%m-%d") > start_date) & (datetime.strptime(dates[i], "%Y-%m-%d") < end_date)):
                 # TODO: 1. concatenate relative url to full url
                 #       2. for each url call self.crawl_content
@@ -67,17 +69,16 @@ class Crawler(object):
                 #       3. append the date, title and content to
                 #          contents
                 #print(datetime.strptime(dates[i], "%Y-%m-%d"), start_date, end_date)
+                
                 this_site = list()
                 this_site.append(dates[i])
                 this_site.append(titles[i])
                 new_url = self.base_url + rel_urls[i]
-                
                 this_site.append(self.crawl_content(new_url))
-                
                 contents.append(this_site)
                 #print(this_site)
-            
-        return contents, datetime.strptime(dates[9], "%Y-%m-%d")
+        return contents, last_date
+        
 
     def crawl_content(self, url):
         """Crawl the content of given url
